@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Spider Sprint Seed Editor v1.0.3</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #ececec;
+    margin: 0;
+    padding: 18px;
+  }
+  h1 {
+    margin: 0 0 4px 0;
+    font-size: 24px;
+  }
+  h2 { margin: 12px 0 6px 0; }
+  .version {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  .note { font-size: 13px; color: #444; line-height: 1.35; }
+  .layout {
+    display: grid;
+    grid-template-columns: 420px 620px;
+    gap: 18px;
+    align-items: start;
+  }
+  .left-wrap {
+    width: 390px;
+  }
+  .phone {
+    width: 390px;
+    height: 844px;
+    background: #111;
+    border-radius: 34px;
+    padding: 14px;
+    box-shadow: 0 12px 35px rgba(0,0,0,.35);
+  }
+  .screen {
+    width: 100%;
+    height: 100%;
+    background: #16814b;
+    border-radius: 24px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .hud {
+    padding: 10px 10px 0 10px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  .topbar {
+    padding: 8px 10px 6px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .foundation { display: flex; gap: 5px; }
+  .slot {
+    width: 38px;
+    height: 52px;
+    border: 2px dashed rgba(255,255,255,.65);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    position: relative;
+    color: rgba(255,255,255,.75);
+  }
+  .slot.filled {
+    border: 2px solid #65ff8f;
+    background: linear-gradient(180deg, #f7fff8, #baf5c7);
+    color: #16753f;
+    box-shadow: 0 0 10px rgba(101,255,143,.55);
+  }
+  .slot.filled::after {
+    content: "✓";
+    position: absolute;
+    right: -5px;
+    top: -7px;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: #18a957;
+    color: white;
+    font-size: 12px;
+    line-height: 17px;
+    text-align: center;
+    border: 1px solid white;
+  }
+  .stock {
+    cursor: pointer;
+    background: #222;
+    color: white;
+    padding: 9px 10px;
+    border-radius: 8px;
+    user-select: none;
+    font-size: 13px;
+  }
+  .columns {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    padding: 8px 6px 12px 6px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .columns::-webkit-scrollbar {
+    display: none;
+  }
+  .column {
+    position: relative;
+    background: rgba(255,255,255,.07);
+    border-radius: 8px;
+    min-height: 100%;
+    border: 2px solid transparent;
+  }
+  .column.dragover {
+    border-color: #ffeb3b;
+    background: rgba(255,255,255,.13);
+  }
+  .empty-placeholder {
+    position: absolute;
+    left: 50%;
+    top: 8px;
+    transform: translateX(-50%);
+    width: 45px;
+    height: 62px;
+    border-radius: 6px;
+    border: 2px solid #65ff8f;
+    background: rgba(101,255,143,.10);
+    box-shadow: 0 0 10px rgba(101,255,143,.55);
+    pointer-events: none;
+  }
+  .card {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 45px;
+    height: 62px;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 17px;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,.35);
+    user-select: none;
+    cursor: grab;
+    border: 1px solid #ddd;
+  }
+  .card.hidden {
+    background: linear-gradient(135deg,#273a8a,#1d2966);
+    color: transparent;
+    cursor: default;
+  }
+  .card.not-movable {
+    background: #d8d8d8;
+    color: #555;
+    cursor: not-allowed;
+    filter: none;
+    opacity: 1;
+  }
+  .credit-under-phone {
+    color: #777;
+    font-size: 11px;
+    text-align: center;
+    margin-top: 8px;
+  }
+  .panel {
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    width: 620px;
+  }
+  .current-seed {
+    display: grid;
+    grid-template-columns: 95px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+    margin-bottom: 10px;
+  }
+  .current-seed label {
+    color: #555;
+    font-weight: bold;
+    font-size: 13px;
+  }
+  .current-seed input {
+    width: 100%;
+    padding: 7px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .dirty {
+    color: #b36b00;
+    font-weight: bold;
+    font-size: 12px;
+    min-width: 112px;
+    text-align: right;
+  }
+  .seed-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  .seed-col label {
+    display: block;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .seed-col textarea {
+    height: 105px;
+    text-align: center;
+    width: 100%;
+    font-family: monospace;
+    font-size: 13px;
+  }
+  .waves {
+    display: grid;
+    grid-template-columns: 70px repeat(7, 1fr);
+    gap: 5px;
+    align-items: center;
+    margin-top: 6px;
+  }
+  .waves .head {
+    font-weight: bold;
+    text-align: center;
+  }
+  .waves input {
+    width: 100%;
+    text-align: center;
+    padding: 5px;
+    font-family: monospace;
+    font-size: 13px;
+  }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+  button, .file-label {
+    margin: 8px 4px 6px 0;
+    padding: 8px 12px;
+    cursor: pointer;
+    border: 1px solid #999;
+    border-radius: 3px;
+    background: #f7f7f7;
+    font-size: 13px;
+  }
+  button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+  }
+  .file-label input { display: none; }
+  .log {
+    background: #111;
+    color: #d7ffd7;
+    height: 190px;
+    overflow: auto;
+    padding: 8px;
+    font-family: monospace;
+    font-size: 12px;
+    white-space: normal;
+    border-radius: 6px;
+  }
+  .log-entry {
+    padding: 3px 4px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    line-height: 1.3;
+  }
+  .log-move { color: #b7ffb7; }
+  .log-reveal { color: #8fd8ff; padding-left: 14px; }
+  .log-event { color: #ffd37a; padding-left: 14px; }
+  .log-invalid { color: #ff9b9b; }
+  .log-system { color: #cfcfcf; }
+  .warning { color: #b00020; font-weight: bold; }
+</style>
+</head>
+<body>
+<h1>Spider Sprint Seed Editor</h1>
+<div class="version">v1.0.3</div>
+<p class="note">Designer tool for building and testing Spider Sprint tutorial seeds. Non-movable cards are gray, not transparent. Unlimited undo/redo is enabled for seed design.</p>
+
+<div class="layout">
+  <div class="left-wrap">
+    <div class="phone">
+      <div class="screen">
+        <div class="hud">
+          <div>Moves: <span id="moveCounter">0</span></div>
+          <div>Time: <span id="timer">00:00</span></div>
+        </div>
+        <div class="topbar">
+          <div class="foundation" id="foundation"></div>
+          <div class="stock" id="stockButton">Stock: <span id="stockCount">0</span></div>
+        </div>
+        <div class="columns" id="columns"></div>
+      </div>
+    </div>
+    <div class="credit-under-phone">Created by Eden Lederman</div>
+  </div>
+
+  <div class="panel">
+    <div class="current-seed">
+      <label for="seedName">Current Seed</label>
+      <input id="seedName" placeholder="Untitled seed" />
+      <div id="dirtyIndicator" class="dirty"></div>
+    </div>
+
+    <h2>Manual Tableau Builder</h2>
+    <p class="note">Cards top-to-bottom. Last card is visible. Empty columns are allowed.</p>
+    <div class="seed-grid" id="tableauBuilder"></div>
+
+    <h2>Stock Waves Builder</h2>
+    <p class="note">Each wave deals one card to each column, C1-C7. Leave blank for empty seed.</p>
+    <div class="waves" id="stockBuilder"></div>
+
+    <div class="toolbar">
+      <button id="loadBtn">Load Seed</button>
+      <button id="clearBtn">New Blank Seed</button>
+      <button id="undoBtn" disabled>Undo</button>
+      <button id="redoBtn" disabled>Redo</button>
+      <button id="copyBtn">Copy JSON</button>
+      <button id="saveFileBtn">Save JSON File</button>
+      <label class="file-label">Open JSON File<input id="openFileInput" type="file" accept=".json,.spiderseed,application/json" /></label>
+    </div>
+
+    <h2>Paste / Import JSON</h2>
+    <p class="note">You can still paste copied JSON here.</p>
+    <textarea id="jsonImport" style="height:90px;width:100%;font-family:monospace;font-size:12px;"></textarea>
+    <button id="loadJsonBtn">Load from JSON Text</button>
+
+    <h2>Validation</h2>
+    <div id="validation" class="note"></div>
+
+    <h2>Move History</h2>
+    <div id="log" class="log"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const rankOrder = {"A":1, "2":2, "3":3, "4":4, "5":5, "6":6, "7":7, "8":8, "9":9, "10":10, "J":11, "Q":12, "K":13};
+  const rankList = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+
+  let columns = [];
+  let stockWaves = [];
+  let foundations = 0;
+  let moveNum = 0;
+  let undoStack = [];
+  let redoStack = [];
+  let dragged = null;
+  let timerStarted = false;
+  let timerStartMs = null;
+  let timerInterval = null;
+  let dirty = false;
+
+  function clone(x) { return JSON.parse(JSON.stringify(x)); }
+
+  function init() {
+    buildEditors();
+    wireEvents();
+    newBlankSeed();
+  }
+
+  function wireEvents() {
+    document.getElementById("loadBtn").addEventListener("click", loadSeedFromBuilder);
+    document.getElementById("clearBtn").addEventListener("click", newBlankSeed);
+    document.getElementById("undoBtn").addEventListener("click", undoMove);
+    document.getElementById("redoBtn").addEventListener("click", redoMove);
+    document.getElementById("copyBtn").addEventListener("click", exportSeedToClipboard);
+    document.getElementById("saveFileBtn").addEventListener("click", saveSeedFile);
+    document.getElementById("openFileInput").addEventListener("change", openSeedFile);
+    document.getElementById("loadJsonBtn").addEventListener("click", loadFromJsonText);
+    document.getElementById("stockButton").addEventListener("click", dealStock);
+
+    document.addEventListener("keydown", function(e) {
+      const target = e.target.tagName.toLowerCase();
+      if (target === "textarea" || target === "input") return;
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !e.shiftKey) {
+        e.preventDefault();
+        undoMove();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === "y" || (e.shiftKey && e.key.toLowerCase() === "z"))) {
+        e.preventDefault();
+        redoMove();
+      }
+    });
+  }
+
+  function markDirty() {
+    dirty = true;
+    updateDirtyIndicator();
+  }
+
+  function clearDirty() {
+    dirty = false;
+    updateDirtyIndicator();
+  }
+
+  function updateDirtyIndicator() {
+    document.getElementById("dirtyIndicator").textContent = dirty ? "● Unsaved Changes" : "";
+  }
+
+  function buildEditors() {
+    const tableauRoot = document.getElementById("tableauBuilder");
+    tableauRoot.innerHTML = "";
+    for (let i = 0; i < 7; i++) {
+      const wrap = document.createElement("div");
+      wrap.className = "seed-col";
+
+      const label = document.createElement("label");
+      label.textContent = "C" + (i + 1);
+
+      const ta = document.createElement("textarea");
+      ta.id = "col" + i;
+      ta.value = "";
+      ta.addEventListener("input", markDirty);
+
+      wrap.appendChild(label);
+      wrap.appendChild(ta);
+      tableauRoot.appendChild(wrap);
+    }
+
+    const stockRoot = document.getElementById("stockBuilder");
+    stockRoot.innerHTML = "";
+    addWaveCell("Wave", "head");
+    for (let c = 0; c < 7; c++) addWaveCell("C" + (c + 1), "head");
+
+    for (let w = 0; w < 4; w++) {
+      addWaveCell("W" + (w + 1), "head");
+      for (let c = 0; c < 7; c++) {
+        const input = document.createElement("input");
+        input.id = "wave" + w + "_" + c;
+        input.value = "";
+        input.addEventListener("input", markDirty);
+        stockRoot.appendChild(input);
+      }
+    }
+
+    document.getElementById("seedName").addEventListener("input", markDirty);
+
+    function addWaveCell(text, cls) {
+      const div = document.createElement("div");
+      div.className = cls;
+      div.textContent = text;
+      stockRoot.appendChild(div);
+    }
+  }
+
+  function newBlankSeed() {
+    document.getElementById("seedName").value = "";
+    for (let i = 0; i < 7; i++) document.getElementById("col" + i).value = "";
+    for (let w = 0; w < 4; w++) {
+      for (let c = 0; c < 7; c++) document.getElementById("wave" + w + "_" + c).value = "";
+    }
+    document.getElementById("jsonImport").value = "";
+    loadSeedFromBuilder();
+    logSystem("New blank seed.");
+    clearDirty();
+  }
+
+  function readBuilderColumns() {
+    const result = [];
+    for (let i = 0; i < 7; i++) {
+      const raw = document.getElementById("col" + i).value;
+      const ranks = raw.split(/[\n,]+/).map(s => s.trim()).filter(Boolean);
+      result.push(ranks.map((rank, idx) => ({rank: rank, faceUp: idx === ranks.length - 1})));
+    }
+    return result;
+  }
+
+  function readBuilderWaves() {
+    const waves = [];
+    for (let w = 0; w < 4; w++) {
+      const wave = [];
+      let hasAny = false;
+      for (let c = 0; c < 7; c++) {
+        const rank = document.getElementById("wave" + w + "_" + c).value.trim();
+        if (rank) hasAny = true;
+        wave.push({rank: rank, faceUp: true});
+      }
+      if (hasAny) waves.push(wave);
+    }
+    return waves;
+  }
+
+  function loadSeedFromBuilder() {
+    stopTimer();
+    columns = readBuilderColumns();
+    stockWaves = readBuilderWaves();
+    foundations = 0;
+    moveNum = 0;
+    undoStack = [];
+    redoStack = [];
+    dragged = null;
+    timerStarted = false;
+    timerStartMs = null;
+    document.getElementById("timer").textContent = "00:00";
+    document.getElementById("log").textContent = "";
+    logSystem("Seed loaded.");
+    clearDirty();
+    validateDeck();
+    render();
+  }
+
+  function getState() {
+    return {
+      columns: clone(columns),
+      stockWaves: clone(stockWaves),
+      foundations: foundations,
+      moveNum: moveNum
+    };
+  }
+
+  function setState(state) {
+    columns = clone(state.columns);
+    stockWaves = clone(state.stockWaves);
+    foundations = state.foundations || 0;
+    moveNum = state.moveNum || 0;
+    validateDeck();
+    render();
+  }
+
+  function pushUndoState() {
+    undoStack.push(getState());
+    redoStack = [];
+    updateUndoRedoButtons();
+  }
+
+  function undoMove() {
+    if (!undoStack.length) {
+      logInvalid("Undo unavailable.");
+      return;
+    }
+    redoStack.push(getState());
+    const prev = undoStack.pop();
+    setState(prev);
+    logSystem("Undo.");
+  }
+
+  function redoMove() {
+    if (!redoStack.length) {
+      logInvalid("Redo unavailable.");
+      return;
+    }
+    undoStack.push(getState());
+    const next = redoStack.pop();
+    setState(next);
+    logSystem("Redo.");
+  }
+
+  function updateUndoRedoButtons() {
+    document.getElementById("undoBtn").disabled = undoStack.length === 0;
+    document.getElementById("redoBtn").disabled = redoStack.length === 0;
+  }
+
+  function render() {
+    updateUndoRedoButtons();
+    document.getElementById("moveCounter").textContent = String(moveNum);
+    document.getElementById("stockCount").textContent = String(stockWaves.length);
+
+    const foundationRoot = document.getElementById("foundation");
+    foundationRoot.innerHTML = "";
+    for (let i = 0; i < 4; i++) {
+      const slot = document.createElement("div");
+      slot.className = "slot" + (i < foundations ? " filled" : "");
+      slot.textContent = "♠";
+      foundationRoot.appendChild(slot);
+    }
+
+    const root = document.getElementById("columns");
+    root.innerHTML = "";
+
+    for (let ci = 0; ci < 7; ci++) {
+      const col = columns[ci] || [];
+      const div = document.createElement("div");
+      div.className = "column";
+      div.dataset.col = String(ci);
+
+      div.addEventListener("dragover", function (e) {
+        e.preventDefault();
+        div.classList.add("dragover");
+      });
+      div.addEventListener("dragleave", function () {
+        div.classList.remove("dragover");
+      });
+      div.addEventListener("drop", function (e) {
+        e.preventDefault();
+        div.classList.remove("dragover");
+        if (dragged) {
+          moveSequence(dragged.col, dragged.idx, ci);
+          dragged = null;
+        }
+      });
+
+      if (col.length === 0) {
+        const ph = document.createElement("div");
+        ph.className = "empty-placeholder";
+        div.appendChild(ph);
+      }
+
+      const spacing = 34;
+      for (let idx = 0; idx < col.length; idx++) {
+        const card = col[idx];
+        const cardDiv = document.createElement("div");
+        const movable = card.faceUp && isMovableSequence(ci, idx);
+        cardDiv.className = "card" + (card.faceUp ? "" : " hidden") + (card.faceUp && !movable ? " not-movable" : "");
+        cardDiv.textContent = card.faceUp ? card.rank : "X";
+        cardDiv.style.top = (idx * spacing) + "px";
+
+        if (card.faceUp) {
+          cardDiv.draggable = movable;
+          cardDiv.addEventListener("dragstart", function (e) {
+            if (!isMovableSequence(ci, idx)) {
+              e.preventDefault();
+              logInvalid("Cannot pick " + card.rank + " in C" + (ci + 1) + ": sequence is locked / not movable.");
+              return;
+            }
+            dragged = {col: ci, idx: idx};
+            e.dataTransfer.setData("text/plain", columns[ci].slice(idx).map(x => x.rank).join("-"));
+          });
+        }
+
+        div.appendChild(cardDiv);
+      }
+
+      root.appendChild(div);
+    }
+    updateColumnHeights();
+  }
+
+  function updateColumnHeights() {
+    const spacing = 34;
+    const cardHeight = 62;
+    const longest = Math.max(0, ...columns.map(col => col.length));
+    const neededHeight = longest > 0 ? ((longest - 1) * spacing + cardHeight + 24) : 0;
+    const visibleHeight = document.getElementById("columns").clientHeight || 690;
+    const targetHeight = Math.max(visibleHeight, neededHeight);
+    document.querySelectorAll(".column").forEach(col => {
+      col.style.minHeight = targetHeight + "px";
+    });
+  }
+
+  function isMovableSequence(ci, idx) {
+    const col = columns[ci];
+    if (!col || !col[idx] || !col[idx].faceUp) return false;
+    for (let i = idx; i < col.length - 1; i++) {
+      if (!col[i].faceUp || !col[i + 1].faceUp) return false;
+      if (rankOrder[col[i].rank] !== rankOrder[col[i + 1].rank] + 1) return false;
+    }
+    return true;
+  }
+
+  function canPlace(seq, destCol) {
+    if (!seq || seq.length === 0) return false;
+    if (!destCol || destCol.length === 0) return true;
+    const movingTop = seq[0];
+    const destTop = destCol[destCol.length - 1];
+    return destTop.faceUp && rankOrder[movingTop.rank] + 1 === rankOrder[destTop.rank];
+  }
+
+  function moveSequence(src, idx, dest) {
+    if (src === dest) return;
+    if (!isMovableSequence(src, idx)) {
+      logInvalid("Move " + (moveNum + 1) + ": Cannot move locked / not movable sequence.");
+      return;
+    }
+    const seq = columns[src].slice(idx);
+    if (!canPlace(seq, columns[dest])) {
+      logInvalid("Move " + (moveNum + 1) + ": Invalid destination for " + seq.map(c => c.rank).join("-") + " to C" + (dest + 1) + ".");
+      return;
+    }
+
+    startTimerIfNeeded();
+    pushUndoState();
+
+    columns[src] = columns[src].slice(0, idx);
+    columns[dest] = columns[dest].concat(seq);
+    moveNum++;
+    logMove(moveNum + ". " + seq.map(c => c.rank).join("-") + " C" + (src + 1) + " → C" + (dest + 1));
+    revealTop(src);
+    checkAllTowers();
+    validateDeck();
+    render();
+  }
+
+  function revealTop(ci) {
+    const col = columns[ci];
+    if (col.length > 0 && !col[col.length - 1].faceUp) {
+      col[col.length - 1].faceUp = true;
+      logReveal("Reveal: " + col[col.length - 1].rank + " in C" + (ci + 1));
+    }
+    if (col.length === 0) {
+      logEvent("Event: Empty Column C" + (ci + 1));
+    }
+  }
+
+  function dealStock() {
+    if (stockWaves.length === 0) {
+      logInvalid("No stock deals left.");
+      return;
+    }
+    const wave = stockWaves[0];
+    if (wave.length !== 7 || wave.some(c => !c.rank)) {
+      logInvalid("Invalid wave. Each active stock wave must contain 7 cards.");
+      return;
+    }
+
+    startTimerIfNeeded();
+    pushUndoState();
+
+    stockWaves.shift();
+    for (let i = 0; i < 7; i++) columns[i].push(wave[i]);
+    moveNum++;
+    logMove(moveNum + ". Stock Deal → " + wave.map(c => c.rank).join(", "));
+    checkAllTowers();
+    validateDeck();
+    render();
+  }
+
+  function checkAllTowers() {
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (let ci = 0; ci < 7; ci++) {
+        const col = columns[ci];
+        if (col.length < 13) continue;
+        const tail = col.slice(col.length - 13);
+        let isTower = true;
+        for (let i = 0; i < 13; i++) {
+          if (!tail[i].faceUp || rankOrder[tail[i].rank] !== 13 - i) {
+            isTower = false;
+            break;
+          }
+        }
+        if (isTower) {
+          columns[ci] = col.slice(0, col.length - 13);
+          foundations++;
+          logEvent("Event: Tower Completed from C" + (ci + 1) + ". Foundations: " + foundations + "/4");
+          revealTop(ci);
+          changed = true;
+        }
+      }
+    }
+  }
+
+  function validateDeck() {
+    const counts = {};
+    rankList.forEach(r => counts[r] = 0);
+    columns.flat().concat(stockWaves.flat()).forEach(c => {
+      if (!c.rank) return;
+      if (counts[c.rank] === undefined) counts[c.rank] = 0;
+      counts[c.rank]++;
+    });
+
+    const total = Object.values(counts).reduce((a,b) => a + b, 0);
+    let html = "<strong>Total cards: " + total + "</strong><br>";
+    html += rankList.map(r => {
+      const ok = counts[r] === 4;
+      return '<span class="' + (ok ? "" : "warning") + '">' + r + ': ' + counts[r] + (ok ? ' ✓' : ' ⚠') + '</span>';
+    }).join("<br>");
+    document.getElementById("validation").innerHTML = html;
+  }
+
+  function startTimerIfNeeded() {
+    if (timerStarted) return;
+    timerStarted = true;
+    timerStartMs = Date.now();
+    timerInterval = setInterval(updateTimer, 250);
+    updateTimer();
+  }
+
+  function stopTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  function updateTimer() {
+    if (!timerStarted) return;
+    const sec = Math.floor((Date.now() - timerStartMs) / 1000);
+    const mm = String(Math.floor(sec / 60)).padStart(2, "0");
+    const ss = String(sec % 60).padStart(2, "0");
+    document.getElementById("timer").textContent = mm + ":" + ss;
+  }
+
+  function buildSeedObject() {
+    return {
+      tool: "Spider Sprint Seed Editor",
+      version: "1.0.3",
+      createdBy: "Eden Lederman",
+      seedName: document.getElementById("seedName").value || "",
+      columns: Array.from({length:7}, (_,i) => document.getElementById("col" + i).value),
+      stockWaves: Array.from({length:4}, (_,w) => Array.from({length:7}, (_,c) => document.getElementById("wave" + w + "_" + c).value)),
+      currentState: {
+        columns: columns,
+        stockWaves: stockWaves,
+        foundations: foundations,
+        moveNum: moveNum,
+        elapsed: document.getElementById("timer").textContent
+      }
+    };
+  }
+
+  function applySeedObject(data) {
+    document.getElementById("seedName").value = data.seedName || "";
+
+    if (Array.isArray(data.columns)) {
+      for (let i = 0; i < 7; i++) document.getElementById("col" + i).value = data.columns[i] || "";
+    } else if (data.currentState && Array.isArray(data.currentState.columns)) {
+      for (let i = 0; i < 7; i++) {
+        const col = data.currentState.columns[i] || [];
+        document.getElementById("col" + i).value = col.map(c => c.rank).join("\\n");
+      }
+    }
+
+    let waves = null;
+    if (Array.isArray(data.stockWaves)) {
+      waves = data.stockWaves;
+    } else if (data.currentState && Array.isArray(data.currentState.stockWaves)) {
+      waves = data.currentState.stockWaves.map(w => w.map(c => c.rank));
+    }
+
+    if (waves) {
+      for (let w = 0; w < 4; w++) {
+        for (let c = 0; c < 7; c++) {
+          const cell = waves[w] && waves[w][c];
+          document.getElementById("wave" + w + "_" + c).value =
+            typeof cell === "string" ? cell : (cell && cell.rank ? cell.rank : "");
+        }
+      }
+    }
+
+    loadSeedFromBuilder();
+    logSystem("Imported seed.");
+    clearDirty();
+  }
+
+  function exportSeedToClipboard() {
+    const seed = buildSeedObject();
+    navigator.clipboard.writeText(JSON.stringify(seed, null, 2)).then(
+      () => log("Copied JSON to clipboard."),
+      () => logInvalid("Could not copy JSON. Browser blocked clipboard access.")
+    );
+  }
+
+  function saveSeedFile() {
+    const seed = buildSeedObject();
+    const blob = new Blob([JSON.stringify(seed, null, 2)], {type: "application/json"});
+    const a = document.createElement("a");
+    const rawName = (seed.seedName || "spider_sprint_seed").replace(/[^a-z0-9_-]+/gi, "_").replace(/^_+|_+$/g, "");
+    a.href = URL.createObjectURL(blob);
+    a.download = (rawName || "spider_sprint_seed") + ".spiderseed.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    logSystem("Saved JSON file.");
+    clearDirty();
+  }
+
+  function openSeedFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      try {
+        const data = JSON.parse(evt.target.result);
+        applySeedObject(data);
+      } catch (err) {
+        logInvalid("Could not open file. Invalid JSON.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+
+  function loadFromJsonText() {
+    const raw = document.getElementById("jsonImport").value.trim();
+    if (!raw) {
+      logInvalid("No JSON pasted.");
+      return;
+    }
+    try {
+      applySeedObject(JSON.parse(raw));
+    } catch (err) {
+      logInvalid("Invalid JSON text.");
+    }
+  }
+
+  function log(text, type) {
+    const el = document.getElementById("log");
+    const div = document.createElement("div");
+    div.className = "log-entry " + (type ? "log-" + type : "log-system");
+    div.textContent = text;
+    el.appendChild(div);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function logMove(text) { log(text, "move"); }
+  function logReveal(text) { log(text, "reveal"); }
+  function logEvent(text) { log(text, "event"); }
+  function logInvalid(text) { log(text, "invalid"); }
+  function logSystem(text) { log(text, "system"); }
+
+  window.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+</body>
+</html>
