@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Spider Sprint Seed Editor v1.0.4</title>
+<title>Spider Sprint Seed Editor v1.1.0</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -299,7 +299,7 @@
 </head>
 <body>
 <h1>Spider Sprint Seed Editor</h1>
-<div class="version">v1.0.3</div>
+<div class="version">v1.1.0</div>
 <p class="note">Designer tool for building and testing Spider Sprint tutorial seeds. Non-movable cards are gray, not transparent. Unlimited undo/redo is enabled for seed design.</p>
 
 <div class="layout">
@@ -325,6 +325,16 @@
       <label for="seedName">Current Seed</label>
       <input id="seedName" placeholder="Untitled seed" />
       <div id="dirtyIndicator" class="dirty"></div>
+    </div>
+
+    <h2>Seed Library</h2>
+    <p class="note">Loads shared seeds from <code>/seeds/index.json</code>. Use this for team-shared tutorial seeds.</p>
+    <div class="toolbar">
+      <select id="seedLibrarySelect" style="min-width:260px;padding:8px;">
+        <option value="">Loading seed library...</option>
+      </select>
+      <button id="loadLibrarySeedBtn">Load Library Seed</button>
+      <button id="refreshLibraryBtn">Refresh Library</button>
     </div>
 
     <h2>Manual Tableau Builder</h2>
@@ -381,6 +391,7 @@
     buildEditors();
     wireEvents();
     newBlankSeed();
+    loadSeedLibrary();
   }
 
   function wireEvents() {
@@ -393,6 +404,8 @@
     document.getElementById("openFileInput").addEventListener("change", openSeedFile);
     document.getElementById("loadJsonBtn").addEventListener("click", loadFromJsonText);
     document.getElementById("stockButton").addEventListener("click", dealStock);
+    document.getElementById("loadLibrarySeedBtn").addEventListener("click", loadSelectedLibrarySeed);
+    document.getElementById("refreshLibraryBtn").addEventListener("click", loadSeedLibrary);
 
     document.addEventListener("keydown", function(e) {
       const target = e.target.tagName.toLowerCase();
@@ -807,7 +820,7 @@
   function buildSeedObject() {
     return {
       tool: "Spider Sprint Seed Editor",
-      version: "1.0.3",
+      version: "1.1.0",
       createdBy: "Eden Lederman",
       seedName: document.getElementById("seedName").value || "",
       columns: Array.from({length:7}, (_,i) => document.getElementById("col" + i).value),
@@ -894,6 +907,86 @@
     reader.readAsText(file);
     e.target.value = "";
   }
+
+
+  async function loadSeedLibrary() {
+    const select = document.getElementById("seedLibrarySelect");
+    if (!select) return;
+
+    select.innerHTML = "";
+    const loading = document.createElement("option");
+    loading.value = "";
+    loading.textContent = "Loading seed library...";
+    select.appendChild(loading);
+
+    try {
+      const response = await fetch("seeds/index.json?cacheBust=" + Date.now());
+      if (!response.ok) throw new Error("Missing seeds/index.json");
+
+      const seeds = await response.json();
+      select.innerHTML = "";
+
+      if (!Array.isArray(seeds) || seeds.length === 0) {
+        const empty = document.createElement("option");
+        empty.value = "";
+        empty.textContent = "No shared seeds found";
+        select.appendChild(empty);
+        logSystem("Seed library is empty.");
+        return;
+      }
+
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "Choose shared seed...";
+      select.appendChild(placeholder);
+
+      seeds.forEach(seed => {
+        const option = document.createElement("option");
+        option.value = seed.file;
+        option.textContent = seed.name || seed.file;
+        option.dataset.seedName = seed.name || "";
+        select.appendChild(option);
+      });
+
+      logSystem("Seed library loaded: " + seeds.length + " seeds.");
+    } catch (err) {
+      select.innerHTML = "";
+      const option = document.createElement("option");
+      option.value = "";
+      option.textContent = "No seed library found";
+      select.appendChild(option);
+      logInvalid("Could not load seeds/index.json. Upload it to enable Seed Library.");
+    }
+  }
+
+  async function loadSelectedLibrarySeed() {
+    const select = document.getElementById("seedLibrarySelect");
+    const file = select ? select.value : "";
+    if (!file) {
+      logInvalid("No library seed selected.");
+      return;
+    }
+
+    try {
+      const safeFile = file.replace(/^\/+/, "");
+      const url = "seeds/" + safeFile + "?cacheBust=" + Date.now();
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Could not fetch seed file");
+
+      const data = await response.json();
+      applySeedObject(data);
+
+      const selectedOption = select.options[select.selectedIndex];
+      if (!document.getElementById("seedName").value && selectedOption.dataset.seedName) {
+        document.getElementById("seedName").value = selectedOption.dataset.seedName;
+      }
+
+      logSystem("Loaded library seed: " + (selectedOption.textContent || file));
+    } catch (err) {
+      logInvalid("Could not load selected library seed. Check file name in seeds/index.json.");
+    }
+  }
+
 
   function loadFromJsonText() {
     const raw = document.getElementById("jsonImport").value.trim();
