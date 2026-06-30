@@ -1,0 +1,292 @@
+{
+  "tool": "Spider Sprint Seed Editor",
+  "version": "1.0.0",
+  "createdBy": "Eden Lederman",
+  "seedName": "Tutorial Seed",
+  "columns": [
+    "K\nA\n3",
+    "J\n9\n4",
+    "10\n8\n5",
+    "6\nQ\n6",
+    "7\n5\nJ\n7",
+    "2\n4\n10\n8",
+    "A\n3\n2\n9"
+  ],
+  "stockWaves": [
+    [
+      "K",
+      "Q",
+      "J",
+      "10",
+      "9",
+      "8",
+      "7"
+    ],
+    [
+      "K",
+      "Q",
+      "6",
+      "5",
+      "4",
+      "3",
+      "2"
+    ],
+    [
+      "Q",
+      "K",
+      "J",
+      "8",
+      "7",
+      "6",
+      "A"
+    ],
+    [
+      "A",
+      "10",
+      "9",
+      "5",
+      "4",
+      "3",
+      "2"
+    ]
+  ],
+  "currentState": {
+    "columns": [
+      [
+        {
+          "rank": "K",
+          "faceUp": false
+        },
+        {
+          "rank": "A",
+          "faceUp": false
+        },
+        {
+          "rank": "3",
+          "faceUp": true
+        }
+      ],
+      [
+        {
+          "rank": "J",
+          "faceUp": false
+        },
+        {
+          "rank": "9",
+          "faceUp": false
+        },
+        {
+          "rank": "4",
+          "faceUp": true
+        }
+      ],
+      [
+        {
+          "rank": "10",
+          "faceUp": false
+        },
+        {
+          "rank": "8",
+          "faceUp": false
+        },
+        {
+          "rank": "5",
+          "faceUp": true
+        }
+      ],
+      [
+        {
+          "rank": "6",
+          "faceUp": false
+        },
+        {
+          "rank": "Q",
+          "faceUp": false
+        },
+        {
+          "rank": "6",
+          "faceUp": true
+        }
+      ],
+      [
+        {
+          "rank": "7",
+          "faceUp": false
+        },
+        {
+          "rank": "5",
+          "faceUp": false
+        },
+        {
+          "rank": "J",
+          "faceUp": false
+        },
+        {
+          "rank": "7",
+          "faceUp": true
+        }
+      ],
+      [
+        {
+          "rank": "2",
+          "faceUp": false
+        },
+        {
+          "rank": "4",
+          "faceUp": false
+        },
+        {
+          "rank": "10",
+          "faceUp": false
+        },
+        {
+          "rank": "8",
+          "faceUp": true
+        }
+      ],
+      [
+        {
+          "rank": "A",
+          "faceUp": false
+        },
+        {
+          "rank": "3",
+          "faceUp": false
+        },
+        {
+          "rank": "2",
+          "faceUp": false
+        },
+        {
+          "rank": "9",
+          "faceUp": true
+        }
+      ]
+    ],
+    "stockWaves": [
+      [
+        {
+          "rank": "K",
+          "faceUp": true
+        },
+        {
+          "rank": "Q",
+          "faceUp": true
+        },
+        {
+          "rank": "J",
+          "faceUp": true
+        },
+        {
+          "rank": "10",
+          "faceUp": true
+        },
+        {
+          "rank": "9",
+          "faceUp": true
+        },
+        {
+          "rank": "8",
+          "faceUp": true
+        },
+        {
+          "rank": "7",
+          "faceUp": true
+        }
+      ],
+      [
+        {
+          "rank": "K",
+          "faceUp": true
+        },
+        {
+          "rank": "Q",
+          "faceUp": true
+        },
+        {
+          "rank": "6",
+          "faceUp": true
+        },
+        {
+          "rank": "5",
+          "faceUp": true
+        },
+        {
+          "rank": "4",
+          "faceUp": true
+        },
+        {
+          "rank": "3",
+          "faceUp": true
+        },
+        {
+          "rank": "2",
+          "faceUp": true
+        }
+      ],
+      [
+        {
+          "rank": "Q",
+          "faceUp": true
+        },
+        {
+          "rank": "K",
+          "faceUp": true
+        },
+        {
+          "rank": "J",
+          "faceUp": true
+        },
+        {
+          "rank": "8",
+          "faceUp": true
+        },
+        {
+          "rank": "7",
+          "faceUp": true
+        },
+        {
+          "rank": "6",
+          "faceUp": true
+        },
+        {
+          "rank": "A",
+          "faceUp": true
+        }
+      ],
+      [
+        {
+          "rank": "A",
+          "faceUp": true
+        },
+        {
+          "rank": "10",
+          "faceUp": true
+        },
+        {
+          "rank": "9",
+          "faceUp": true
+        },
+        {
+          "rank": "5",
+          "faceUp": true
+        },
+        {
+          "rank": "4",
+          "faceUp": true
+        },
+        {
+          "rank": "3",
+          "faceUp": true
+        },
+        {
+          "rank": "2",
+          "faceUp": true
+        }
+      ]
+    ],
+    "foundations": 0,
+    "moveNum": 0,
+    "elapsed": "00:00"
+  }
+}
