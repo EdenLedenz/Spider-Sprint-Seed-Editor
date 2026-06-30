@@ -2,5 +2,9 @@
   {
     "name": "Example Seed",
     "file": "example_seed.spiderseed.json"
+  },
+  {
+    "name": "Tutorial Seed",
+    "file": "Tutorial_Seed.json"
   }
 ]
